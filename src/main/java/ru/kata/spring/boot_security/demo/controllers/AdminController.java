@@ -42,6 +42,9 @@ public class AdminController {
 
     @PostMapping("/users")
     public String add(@ModelAttribute("user") @Valid User user, BindingResult bindingResult, Model model) {
+        if(userService.findByEmail(user.getEmail()) != null) {
+            bindingResult.rejectValue("email", "", "Этот адрес электронной почты уже используется");
+        }
         if(userService.findByUsername(user.getUsername()) != null) {
             bindingResult.rejectValue("username", "", "Пользователь с таким именем уже существует");
         }
@@ -62,6 +65,9 @@ public class AdminController {
 
     @PatchMapping("/users/{id}")
     public String update(@ModelAttribute("user") @Valid User user, BindingResult bindingResult, @PathVariable("id") int id, Model model) {
+        if(userService.findByEmail(user.getEmail()) != null) {
+            bindingResult.rejectValue("email", "", "Этот адрес электронной почты уже используется");
+        }
         if(userService.findByUsername(user.getUsername()) != null) {
             bindingResult.rejectValue("username", "", "Пользователь с таким именем уже существует");
         }

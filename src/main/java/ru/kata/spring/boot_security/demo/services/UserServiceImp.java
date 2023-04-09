@@ -60,5 +60,11 @@ public class UserServiceImp implements UserService {
         return userRepositories.findByUsername(username);
     }
 
+    @Transactional(readOnly = true)
+    @Override
+    public User findByEmail(String email) {
+        return userRepositories.findByEmail(email);
+    }
+
 
 }
