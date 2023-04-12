@@ -141,6 +141,15 @@ public class User implements UserDetails {
                 '}';
     }
 
+    public String roleToString(){
+        List<Role> roleList = getRoles();
+        StringBuilder sb = new StringBuilder();
+        for(Role role: roleList){
+            sb.append(role.toString()).append(" ");
+        }
+        return sb.toString();
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

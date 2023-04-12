@@ -2,12 +2,12 @@ package ru.kata.spring.boot_security.demo.controllers;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import ru.kata.spring.boot_security.demo.models.User;
 import ru.kata.spring.boot_security.demo.services.RoleService;
 import ru.kata.spring.boot_security.demo.services.UserService;
 import javax.validation.Valid;
+import java.security.Principal;
 
 
 @Controller
@@ -21,67 +21,31 @@ public class AdminController {
         this.roleService = roleService;
     }
 
-    @GetMapping("/users")
-    public String index(Model model) {
+    @GetMapping()
+    public String index(Model model, Principal principal) {
+        User admin = userService.findByUsername(principal.getName());
+        model.addAttribute("admin", admin);
         model.addAttribute("users", userService.findAll());
-        return "users";
-    }
-
-    @GetMapping("/users/{id}")
-    public String show(@PathVariable("id") int id, Model model) {
-        model.addAttribute("user", userService.findOne(id));
-        return "show";
-    }
-
-    @GetMapping("/users/new")
-    public String newUser(Model model){
         model.addAttribute("allRoles", roleService.findAll());
         model.addAttribute("user", new User());
-        return "new";
+        return "admin";
     }
 
-    @PostMapping("/users")
-    public String add(@ModelAttribute("user") @Valid User user, BindingResult bindingResult, Model model) {
-        if(userService.findByEmail(user.getEmail()) != null) {
-            bindingResult.rejectValue("email", "", "Этот адрес электронной почты уже используется");
-        }
-        if(userService.findByUsername(user.getUsername()) != null) {
-            bindingResult.rejectValue("username", "", "Пользователь с таким именем уже существует");
-        }
-        if (bindingResult.hasErrors()) {
-            model.addAttribute("allRoles", roleService.findAll());
-            return "new";
-        }
+    @PostMapping()
+    public String add(@ModelAttribute("user") @Valid User user) {
         userService.save(user);
-        return "redirect:/admin/users";
+        return "redirect:/admin";
     }
 
-    @GetMapping("/users/{id}/edit")
-    public String edit(Model model, @PathVariable("id") int id) {
-        model.addAttribute("user", userService.findOne(id));
-        model.addAttribute("allRoles", roleService.findAll());
-        return "edit";
-    }
-
-    @PatchMapping("/users/{id}")
-    public String update(@ModelAttribute("user") @Valid User user, BindingResult bindingResult, @PathVariable("id") int id, Model model) {
-        if(userService.findByEmail(user.getEmail()) != null) {
-            bindingResult.rejectValue("email", "", "Этот адрес электронной почты уже используется");
-        }
-        if(userService.findByUsername(user.getUsername()) != null) {
-            bindingResult.rejectValue("username", "", "Пользователь с таким именем уже существует");
-        }
-        if (bindingResult.hasErrors()) {
-            model.addAttribute("allRoles", roleService.findAll());
-            return "edit";
-        }
+    @PatchMapping("/edit/{id}")
+    public String update(@ModelAttribute("user") @Valid User user, @PathVariable("id") int id) {
         userService.update(id, user);
-        return "redirect:/admin/users";
+        return "redirect:/admin";
     }
 
-    @DeleteMapping("/users/{id}")
+    @DeleteMapping("/delete/{id}")
     public String remove(@PathVariable("id") int id) {
         userService.delete(id);
-        return "redirect:/admin/users";
+        return "redirect:/admin";
     }
 }

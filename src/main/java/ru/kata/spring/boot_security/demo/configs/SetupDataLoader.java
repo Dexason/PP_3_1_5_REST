@@ -27,8 +27,8 @@ public class SetupDataLoader implements ApplicationListener<ContextRefreshedEven
         if (alreadySetup) return;
         Role roleAdmin = createRoleIfNotFound("ROLE_ADMIN");
         Role roleUser = createRoleIfNotFound("ROLE_USER");
-        createUserIfNotFound("admin", 30, "test@mail.ru", "testpass", roleAdmin);
-        createUserIfNotFound("user", 25, "testuser@mail.ru","test123", roleUser);
+        createUserIfNotFound("admin", 30, "admin@mail.ru", "testpass", roleAdmin);
+        createUserIfNotFound("user", 25, "user@mail.ru","test123", roleUser);
         alreadySetup = true;
     }
     @Transactional

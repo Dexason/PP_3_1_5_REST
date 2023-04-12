@@ -26,6 +26,7 @@ public class RoleServiceImp implements RoleService {
         return roleRepositories.findAll();
     }
 
+    @Transactional(readOnly = true)
     @Override
     public Role findByName(String name) {
         return roleRepositories.findByName(name);
