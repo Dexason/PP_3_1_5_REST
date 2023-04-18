@@ -41,7 +41,7 @@ public class SetupDataLoader implements ApplicationListener<ContextRefreshedEven
         return role;
     }
     @Transactional
-    User createUserIfNotFound(String name, int age, String email, String password, Role role) {
+    User createUserIfNotFound(String name, Integer age, String email, String password, Role role) {
         User user = userService.findByUsername(name);
         if (user == null) {
             user = new User(name, age, email, password, List.of(role));

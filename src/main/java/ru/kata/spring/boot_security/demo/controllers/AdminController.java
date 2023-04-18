@@ -1,51 +1,67 @@
 package ru.kata.spring.boot_security.demo.controllers;
 
-import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
+import org.modelmapper.ModelMapper;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
+import ru.kata.spring.boot_security.demo.dto.UserDTO;
 import ru.kata.spring.boot_security.demo.models.User;
-import ru.kata.spring.boot_security.demo.services.RoleService;
 import ru.kata.spring.boot_security.demo.services.UserService;
+import ru.kata.spring.boot_security.demo.util.UserValidator;
 import javax.validation.Valid;
 import java.security.Principal;
+import java.util.List;
 
 
-@Controller
+@RestController
 @RequestMapping("/admin")
 public class AdminController {
     private final UserService userService;
-    private final RoleService roleService;
+    private final ModelMapper modelMapper;
+    private final UserValidator userValidator;
 
-    public AdminController(UserService userService, RoleService roleService) {
+    public AdminController(UserService userService, ModelMapper modelMapper, UserValidator userValidator) {
         this.userService = userService;
-        this.roleService = roleService;
+        this.modelMapper = modelMapper;
+        this.userValidator = userValidator;
     }
 
-    @GetMapping()
-    public String index(Model model, Principal principal) {
-        User admin = userService.findByUsername(principal.getName());
-        model.addAttribute("admin", admin);
-        model.addAttribute("users", userService.findAll());
-        model.addAttribute("allRoles", roleService.findAll());
-        model.addAttribute("user", new User());
-        return "admin";
+    @GetMapping("/viewUser")
+    public ResponseEntity<User> showUser(Principal principal) {
+        return ResponseEntity.ok(userService.findByUsername(principal.getName()));
+    }
+    @GetMapping("/users")
+    public ResponseEntity<List<User>> index() {
+        return new ResponseEntity<>(userService.findAll(), HttpStatus.OK);
+    }
+    @GetMapping("/users/{id}")
+    public User show(@PathVariable("id") Integer id) {
+        return userService.findOne(id);
     }
 
-    @PostMapping()
-    public String add(@ModelAttribute("user") @Valid User user) {
-        userService.save(user);
-        return "redirect:/admin";
+    @PostMapping("/users")
+    public ResponseEntity<HttpStatus> add(@RequestBody @Valid UserDTO userDTO, BindingResult bindingResult) {
+        userValidator.validate(userDTO, bindingResult);
+        userService.save(convertToUser(userDTO));
+        return ResponseEntity.ok(HttpStatus.OK);
     }
 
-    @PatchMapping("/edit/{id}")
-    public String update(@ModelAttribute("user") @Valid User user, @PathVariable("id") int id) {
-        userService.update(id, user);
-        return "redirect:/admin";
+    @PatchMapping("users/edit/{id}")
+    public ResponseEntity<HttpStatus> update(@RequestBody @Valid UserDTO userDTO, BindingResult bindingResult, @PathVariable("id") Integer id) {
+        userValidator.validate(userDTO, bindingResult);
+        userService.update(id, convertToUser(userDTO));
+        return ResponseEntity.ok(HttpStatus.OK);
     }
 
-    @DeleteMapping("/delete/{id}")
-    public String remove(@PathVariable("id") int id) {
+    @DeleteMapping("users/delete/{id}")
+    public ResponseEntity<HttpStatus> remove(@PathVariable("id") Integer id) {
         userService.delete(id);
-        return "redirect:/admin";
+        return ResponseEntity.ok(HttpStatus.OK);
     }
+
+    private User convertToUser(UserDTO userDTO) {
+        return modelMapper.map(userDTO, User.class);
+    }
+
 }

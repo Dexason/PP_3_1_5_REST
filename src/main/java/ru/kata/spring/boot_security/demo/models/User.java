@@ -1,5 +1,8 @@
 package ru.kata.spring.boot_security.demo.models;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import org.hibernate.annotations.Fetch;
+import org.hibernate.annotations.FetchMode;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
@@ -18,14 +21,14 @@ public class User implements UserDetails {
     @Id
     @Column
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int id;
+    private Integer id;
     @Column
     @NotEmpty(message = "Имя не должно быть пустым")
     @Size(min = 2, max = 100, message = "Имя должно быть от 2 до 100 символов длиной")
     private String username;
     @Min(value = 1, message = "Год рождения должен быть больше 0")
     @Column
-    private int age;
+    private Integer age;
     @Column
     @NotEmpty(message = "Введите почту")
     @Email
@@ -33,22 +36,17 @@ public class User implements UserDetails {
     @Column
     @NotEmpty(message = "Введите пароль")
     private String password;
-    @Column
+
     @ManyToMany(fetch = FetchType.LAZY)
+    @Fetch(FetchMode.JOIN)
+    @JoinTable(name = "users_roles", joinColumns = @JoinColumn(name = "user_id"), inverseJoinColumns = @JoinColumn(name = "role_name"))
     private List<Role> roles;
 
     public User() {
     }
 
-    public User(int id, String username, int age, String email, String password) {
+    public User(Integer id, String username, Integer age, String email, String password, List<Role> roles) {
         this.id = id;
-        this.username = username;
-        this.age = age;
-        this.email = email;
-        this.password = password;
-    }
-
-    public User(String username, int age, String email, String password, List<Role> roles) {
         this.username = username;
         this.age = age;
         this.email = email;
@@ -56,11 +54,27 @@ public class User implements UserDetails {
         this.roles = roles;
     }
 
-    public int getId() {
+    public User(Integer id, String username, Integer age, String email, String password) {
+        this.id = id;
+        this.username = username;
+        this.age = age;
+        this.email = email;
+        this.password = password;
+    }
+
+    public User(String username, Integer age, String email, String password, List<Role> roles) {
+        this.username = username;
+        this.age = age;
+        this.email = email;
+        this.password = password;
+        this.roles = roles;
+    }
+
+    public Integer getId() {
         return id;
     }
 
-    public void setId(int id) {
+    public void setId(Integer id) {
         this.id = id;
     }
 
@@ -68,11 +82,11 @@ public class User implements UserDetails {
         this.username = username;
     }
 
-    public int getAge() {
+    public Integer getAge() {
         return age;
     }
 
-    public void setAge(int age) {
+    public void setAge(Integer age) {
         this.age = age;
     }
 
@@ -86,6 +100,7 @@ public class User implements UserDetails {
 
 
     @Override
+    @JsonIgnore
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return getRoles();
     }
@@ -100,21 +115,25 @@ public class User implements UserDetails {
     }
 
     @Override
+    @JsonIgnore
     public boolean isAccountNonExpired() {
         return true;
     }
 
     @Override
+    @JsonIgnore
     public boolean isAccountNonLocked() {
         return true;
     }
 
     @Override
+    @JsonIgnore
     public boolean isCredentialsNonExpired() {
         return true;
     }
 
     @Override
+    @JsonIgnore
     public boolean isEnabled() {
         return true;
     }
@@ -133,18 +152,13 @@ public class User implements UserDetails {
 
     @Override
     public String toString() {
-        return "User{" +
-                "id=" + id +
-                ", username='" + username + '\'' +
-                ", age=" + age +
-                ", email='" + email + '\'' +
-                '}';
+        return "User{" + "id=" + id + ", username='" + username + '\'' + ", age=" + age + ", email='" + email + '\'' + '}';
     }
 
-    public String roleToString(){
+    public String roleToString() {
         List<Role> roleList = getRoles();
         StringBuilder sb = new StringBuilder();
-        for(Role role: roleList){
+        for (Role role : roleList) {
             sb.append(role.toString()).append(" ");
         }
         return sb.toString();
@@ -155,11 +169,11 @@ public class User implements UserDetails {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         User user = (User) o;
-        return id == user.id && age == user.age && Objects.equals(username, user.username) && Objects.equals(email, user.email) && Objects.equals(password, user.password);
+        return Objects.equals(id, user.id) && Objects.equals(username, user.username) && Objects.equals(age, user.age) && Objects.equals(email, user.email) && Objects.equals(password, user.password) && Objects.equals(roles, user.roles);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, username, age, email, password);
+        return Objects.hash(id, username, age, email, password, roles);
     }
 }

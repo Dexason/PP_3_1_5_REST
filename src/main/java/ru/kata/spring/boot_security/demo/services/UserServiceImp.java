@@ -36,14 +36,14 @@ public class UserServiceImp implements UserService {
 
     @Transactional(readOnly = true)
     @Override
-    public User findOne(int id) {
+    public User findOne(Integer id) {
         Optional<User> foundUser = userRepositories.findById(id);
         return foundUser.orElse(null);
     }
 
     @Transactional
     @Override
-    public void update(int id, User updatedUser) {
+    public void update(Integer id, User updatedUser) {
         updatedUser.setId(id);
         updatedUser.setPassword(passwordEncoder.encode(updatedUser.getPassword()));
         userRepositories.save(updatedUser);
@@ -51,7 +51,7 @@ public class UserServiceImp implements UserService {
 
     @Transactional
     @Override
-    public void delete(int id) {
+    public void delete(Integer id) {
         userRepositories.deleteById(id);
     }
 
