@@ -12,7 +12,6 @@ public class Role implements GrantedAuthority {
     @Column
     private String name;
 
-
     public Role() {
     }
 
